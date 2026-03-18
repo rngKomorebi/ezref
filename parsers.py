@@ -5,7 +5,6 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
-
 from config import (
     ARXIV_PATTERNS,
     DEFAULT_HEADERS,
@@ -44,6 +43,17 @@ def extract_doi(text: str) -> Optional[str]:
     Returns:
         DOI string (e.g., "10.1038/nature12345") or None
     """
+    # Elsevier PII-based article URLs:
+    #   e.g. https://www.jbc.org/article/S0021-9258(19)52451-6/fulltext
+    #   DOI = 10.1016/{PII}
+    pii_match = re.search(
+        r"/article/(S\d{4}-\d{4}\(\d{2}\)\d{5}-\d)(?:/|$)",
+        text,
+        re.IGNORECASE,
+    )
+    if pii_match:
+        return f"10.1016/{pii_match.group(1)}"
+
     patterns = [
         r"doi\.org/(10\.\S+)",
         r"(10\.\d{4,}/\S+)",
