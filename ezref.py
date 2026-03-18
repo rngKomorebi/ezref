@@ -6,15 +6,35 @@ Run with:
 
 import re
 import time
-import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog
+
+try:
+    import tkinter as tk
+    from tkinter import filedialog
+
+    _HAS_TKINTER = True
+except Exception:
+    _HAS_TKINTER = False
 
 import streamlit as st
+
 from api_clients import (
     get_crossref_by_doi,
     get_from_arxiv,
     search_crossref_by_citation,
+)
+from bib_fix import REQUEST_DELAY
+from bib_fix import extract_arxiv_id as _bib_extract_arxiv_id
+from bib_fix import (
+    extract_citation_keys,
+    extract_title_for_doi,
+    fetch_arxiv_publication,
+    fetch_bibtex_from_doi,
+    fetch_doi,
+    fetch_doi_for_arxiv,
+    insert_doi,
+    normalize_entry,
+    parse_bib_file,
 )
 from bibtex_utils import (
     bib_entry_dict_to_string,
@@ -37,20 +57,6 @@ from parsers import (
     extract_metadata_from_url,
 )
 
-from bib_fix import REQUEST_DELAY
-from bib_fix import extract_arxiv_id as _bib_extract_arxiv_id
-from bib_fix import (
-    extract_citation_keys,
-    extract_title_for_doi,
-    fetch_arxiv_publication,
-    fetch_bibtex_from_doi,
-    fetch_doi,
-    fetch_doi_for_arxiv,
-    insert_doi,
-    normalize_entry,
-    parse_bib_file,
-)
-
 # ── Page configuration ───────────────────────────────────────────────────────
 st.set_page_config(page_title="EZRef", page_icon="📖", layout="wide")
 
@@ -63,12 +69,6 @@ for _k, _v in {
 }.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
-
-# Apply any pending browse results BEFORE widgets are instantiated.
-for _wkey in ("bc_tex_path", "bc_bib_path"):
-    _pkey = f"_{_wkey}_pending"
-    if _pkey in st.session_state:
-        st.session_state[_wkey] = st.session_state.pop(_pkey)
 
 # ── Always hide the sidebar ─────────────────────────────────────────────────
 st.markdown(
@@ -181,10 +181,17 @@ if dark_mode:
             border: 1px solid #FC7D49 !important;
         }
         /* Primary buttons */
-        button[data-testid="baseButton-primary"] {
+        html body .stApp button[data-testid="baseButton-primary"],
+        html body .stApp .stButton > button[data-testid="baseButton-primary"] {
             background: #FC7D49 !important;
             background-color: #FC7D49 !important;
             color: #FFFFFF !important;
+            border: none !important;
+        }
+        html body .stApp button[data-testid="baseButton-primary"]:hover,
+        html body .stApp .stButton > button[data-testid="baseButton-primary"]:hover {
+            background: #e06535 !important;
+            background-color: #e06535 !important;
             border: none !important;
         }
         .stMarkdown, .stMarkdown p, .stMarkdown li {
@@ -309,9 +316,16 @@ else:
             border: 1px solid #FC7D49 !important;
         }
         /* Primary buttons */
+        .stButton > button[data-testid="baseButton-primary"],
         button[data-testid="baseButton-primary"] {
             background-color: #FC7D49 !important;
             color: #FFFFFF !important;
+            border: none !important;
+        }
+        .stButton > button[data-testid="baseButton-primary"]:hover,
+        button[data-testid="baseButton-primary"]:hover {
+            background-color: #e06535 !important;
+            border: none !important;
         }
         .stMarkdown, .stMarkdown p, .stMarkdown li {
             color: #31333F !important;
@@ -601,15 +615,14 @@ def _render_table(rows: list[dict], dark: bool) -> None:
 
 
 def _run_bib_cleaner(
-    tex_path: Path,
-    bib_path: Path,
+    tex_content: str,
+    bib_content: str,
+    bib_name: str,
     no_doi: bool,
     keep_unused: bool,
     check_arxiv: bool,
 ) -> dict:
     """Execute the full BibTeX cleaning pipeline; return a result dict."""
-    tex_content = tex_path.read_text(encoding="utf-8")
-    bib_content = bib_path.read_text(encoding="utf-8")
 
     used_ordered, used_set = extract_citation_keys(tex_content)
     bib_entries = parse_bib_file(bib_content)
@@ -794,7 +807,7 @@ def _run_bib_cleaner(
         "unused": unused,
         "n_used": len(used_ordered),
         "n_bib": len(bib_entries),
-        "out_name": bib_path.stem + "_clean.bib",
+        "out_name": Path(bib_name).stem + "_clean.bib",
     }
 
 
@@ -808,49 +821,77 @@ with tab_bib:
         "in your `.tex` file."
     )
 
+    # Apply any pending browse results BEFORE widgets are instantiated.
+    for _wkey in ("bc_tex_path", "bc_bib_path"):
+        _pkey = f"_{_wkey}_pending"
+        if _pkey in st.session_state:
+            st.session_state[_wkey] = st.session_state.pop(_pkey)
+
     col_tex, col_bib_col = st.columns(2)
 
-    with col_tex:
-        t_inp, t_btn = st.columns([6, 1], vertical_alignment="bottom")
-        with t_inp:
-            tex_str = st.text_input(
-                "Path to **.tex** file",
-                key="bc_tex_path",
-                placeholder=r"C:\path\to\paper.tex",
-            )
-        with t_btn:
-            if st.button(
-                "📂",
-                key="bc_tex_browse",
-                help="Browse for .tex file",
-                use_container_width=True,
-            ):
-                _browse_file(
-                    "bc_tex_path",
-                    [("TeX files", "*.tex"), ("All files", "*.*")],
+    if _HAS_TKINTER:
+        # ── Local mode: path text inputs + native browse buttons ────────────
+        with col_tex:
+            t_inp, t_btn = st.columns([6, 1], vertical_alignment="bottom")
+            with t_inp:
+                tex_str = st.text_input(
+                    "Path to **.tex** file",
+                    key="bc_tex_path",
+                    placeholder=r"C:\path\to\paper.tex",
                 )
-                st.rerun()
+            with t_btn:
+                if st.button(
+                    "📂",
+                    key="bc_tex_browse",
+                    help="Browse for .tex file",
+                    use_container_width=True,
+                ):
+                    _browse_file(
+                        "bc_tex_path",
+                        [("TeX files", "*.tex"), ("All files", "*.*")],
+                    )
+                    st.rerun()
 
-    with col_bib_col:
-        b_inp, b_btn = st.columns([6, 1], vertical_alignment="bottom")
-        with b_inp:
-            bib_str = st.text_input(
-                "Path to **.bib** file",
-                key="bc_bib_path",
-                placeholder=r"C:\path\to\refs.bib",
-            )
-        with b_btn:
-            if st.button(
-                "📂",
-                key="bc_bib_browse",
-                help="Browse for .bib file",
-                use_container_width=True,
-            ):
-                _browse_file(
-                    "bc_bib_path",
-                    [("BibTeX files", "*.bib"), ("All files", "*.*")],
+        with col_bib_col:
+            b_inp, b_btn = st.columns([6, 1], vertical_alignment="bottom")
+            with b_inp:
+                bib_str = st.text_input(
+                    "Path to **.bib** file",
+                    key="bc_bib_path",
+                    placeholder=r"C:\path\to\refs.bib",
                 )
-                st.rerun()
+            with b_btn:
+                if st.button(
+                    "📂",
+                    key="bc_bib_browse",
+                    help="Browse for .bib file",
+                    use_container_width=True,
+                ):
+                    _browse_file(
+                        "bc_bib_path",
+                        [("BibTeX files", "*.bib"), ("All files", "*.*")],
+                    )
+                    st.rerun()
+
+        tex_file = None
+        bib_file = None
+
+    else:
+        # ── Cloud mode: file uploaders ───────────────────────────────────────
+        tex_str = None
+        bib_str = None
+        with col_tex:
+            tex_file = st.file_uploader(
+                "Upload **.tex** file",
+                type=["tex"],
+                key="bc_tex_upload",
+            )
+        with col_bib_col:
+            bib_file = st.file_uploader(
+                "Upload **.bib** file",
+                type=["bib"],
+                key="bc_bib_upload",
+            )
 
     col_opt1, col_opt2, col_opt3 = st.columns(3)
     with col_opt1:
@@ -878,26 +919,54 @@ with tab_bib:
 
     if run_clean:
         errors = []
-        tex_path = Path(tex_str.strip()) if tex_str.strip() else None
-        bib_path_val = Path(bib_str.strip()) if bib_str.strip() else None
 
-        if not tex_path:
-            errors.append("Please provide a path to the `.tex` file.")
-        elif not tex_path.exists():
-            errors.append(f"`.tex` file not found: `{tex_path}`")
-        if not bib_path_val:
-            errors.append("Please provide a path to the `.bib` file.")
-        elif not bib_path_val.exists():
-            errors.append(f"`.bib` file not found: `{bib_path_val}`")
+        if _HAS_TKINTER:
+            # Local path mode
+            tex_path = (
+                Path(tex_str.strip()) if tex_str and tex_str.strip() else None
+            )
+            bib_path_val = (
+                Path(bib_str.strip()) if bib_str and bib_str.strip() else None
+            )
+            if not tex_path:
+                errors.append("Please provide a path to the `.tex` file.")
+            elif not tex_path.exists():
+                errors.append(f"`.tex` file not found: `{tex_path}`")
+            if not bib_path_val:
+                errors.append("Please provide a path to the `.bib` file.")
+            elif not bib_path_val.exists():
+                errors.append(f"`.bib` file not found: `{bib_path_val}`")
+        else:
+            # Cloud upload mode
+            tex_path = None
+            bib_path_val = None
+            if not tex_file:
+                errors.append("Please upload a `.tex` file.")
+            if not bib_file:
+                errors.append("Please upload a `.bib` file.")
 
         if errors:
             for msg in errors:
                 st.error(msg)
             st.stop()
 
+        if _HAS_TKINTER:
+            tex_content = tex_path.read_text(encoding="utf-8")
+            bib_content = bib_path_val.read_text(encoding="utf-8")
+            bib_name = bib_path_val.name
+        else:
+            tex_content = tex_file.read().decode("utf-8")
+            bib_content = bib_file.read().decode("utf-8")
+            bib_name = bib_file.name
+
         with st.spinner("Processing…"):
             st.session_state["bc_result"] = _run_bib_cleaner(
-                tex_path, bib_path_val, no_doi, keep_unused, check_arxiv
+                tex_content,
+                bib_content,
+                bib_name,
+                no_doi,
+                keep_unused,
+                check_arxiv,
             )
 
     if "bc_result" in st.session_state:
