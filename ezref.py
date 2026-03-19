@@ -248,6 +248,27 @@ if dark_mode:
             background-color: #1E1E2E !important;
             color: #FAFAFA !important;
         }
+        /* File uploader – cloud mode */
+        [data-testid="stFileUploaderDropzone"] {
+            background-color: #262730 !important;
+            border: 1px solid #4A4A4A !important;
+            border-radius: 6px !important;
+        }
+        [data-testid="stFileUploaderDropzone"] small {
+            color: #808080 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button {
+            background-color: #1E1E2E !important;
+            border: 1px solid #4A4A4A !important;
+            color: #FAFAFA !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button:hover {
+            background-color: #3A3A4A !important;
+            border: 1px solid #FC7D49 !important;
+        }
+        [data-testid="stFileUploader"] label {
+            color: #FAFAFA !important;
+        }
         </style>
         """
 else:
@@ -339,6 +360,24 @@ else:
         a { color: #FC7D49 !important; }
         a:hover { color: #FFA07A !important; }
         .stCheckbox label { color: #31333F !important; }
+        /* File uploader – cloud mode */
+        [data-testid="stFileUploaderDropzone"] {
+            background-color: #F8F9FA !important;
+            border: 1px solid #CCC !important;
+            border-radius: 6px !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button {
+            background-color: #FFFFFF !important;
+            border: 1px solid #CCC !important;
+            color: #31333F !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button:hover {
+            background-color: #F0F2F6 !important;
+            border: 1px solid #FC7D49 !important;
+        }
+        [data-testid="stFileUploader"] label {
+            color: #31333F !important;
+        }
         </style>
         """
 st.markdown(_theme_css, unsafe_allow_html=True)
@@ -830,7 +869,7 @@ with tab_bib:
     col_tex, col_bib_col = st.columns(2)
 
     if _HAS_TKINTER:
-        # ── Local mode: path text inputs + native browse buttons ────────────
+        # ── Local: path text inputs + native 📂 browse buttons ──────────────
         with col_tex:
             t_inp, t_btn = st.columns([6, 1], vertical_alignment="bottom")
             with t_inp:
@@ -851,7 +890,6 @@ with tab_bib:
                         [("TeX files", "*.tex"), ("All files", "*.*")],
                     )
                     st.rerun()
-
         with col_bib_col:
             b_inp, b_btn = st.columns([6, 1], vertical_alignment="bottom")
             with b_inp:
@@ -872,12 +910,10 @@ with tab_bib:
                         [("BibTeX files", "*.bib"), ("All files", "*.*")],
                     )
                     st.rerun()
-
         tex_file = None
         bib_file = None
-
     else:
-        # ── Cloud mode: file uploaders ───────────────────────────────────────
+        # ── Cloud: file uploaders ───────────────────────────────────────────
         tex_str = None
         bib_str = None
         with col_tex:
@@ -919,9 +955,7 @@ with tab_bib:
 
     if run_clean:
         errors = []
-
         if _HAS_TKINTER:
-            # Local path mode
             tex_path = (
                 Path(tex_str.strip()) if tex_str and tex_str.strip() else None
             )
@@ -937,7 +971,6 @@ with tab_bib:
             elif not bib_path_val.exists():
                 errors.append(f"`.bib` file not found: `{bib_path_val}`")
         else:
-            # Cloud upload mode
             tex_path = None
             bib_path_val = None
             if not tex_file:
