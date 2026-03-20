@@ -97,55 +97,61 @@ with _toggle_col:
 # the same tree index, preventing active-tab resets on toggle.
 if dark_mode:
     _theme_css = """
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
         <style>
-        .stApp { background-color: #0E1117 !important; }
-        header[data-testid="stHeader"] { background-color: #0E1117 !important; }
-        .stApp * { color: #FAFAFA; }
+        .stApp { background-color: #060e20 !important; }
+        header[data-testid="stHeader"] { background-color: #060e20 !important; }
+        .stApp * { color: #dee5ff; font-family: 'Inter', sans-serif !important; }
         .stTextInput > div > div > input {
-            background-color: #262730 !important;
-            color: #FAFAFA !important;
-            border: 1px solid #4A4A4A !important;
+            background-color: #0f1930 !important;
+            color: #dee5ff !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
         .stTextInput > div > div > input::placeholder {
-            color: #808080 !important;
+            color: #a3aac4 !important;
         }
-        .stTextInput label { color: #FAFAFA !important; }
+        .stTextInput label { color: #dee5ff !important; }
         .stTextArea textarea {
-            background-color: #262730 !important;
-            color: #FAFAFA !important;
-            border: 1px solid #4A4A4A !important;
+            background-color: #0f1930 !important;
+            color: #dee5ff !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
-        .stTextArea label { color: #FAFAFA !important; }
-        .stCodeBlock, pre { background-color: #1E1E1E !important; }
+        .stTextArea label { color: #dee5ff !important; }
+        .stCodeBlock, pre { background-color: #091328 !important; }
         code {
-            color: #D4D4D4 !important;
-            background-color: #1E1E1E !important;
+            color: #c3d1ea !important;
+            background-color: #091328 !important;
             padding: 2px 6px !important;
             border-radius: 3px !important;
         }
         .stMarkdown code {
-            color: #87CEEB !important;
-            background-color: #1E1E1E !important;
+            color: #a3a6ff !important;
+            background-color: #091328 !important;
         }
         .stTabs [data-baseweb="tab-list"] {
             background-color: transparent !important;
-            border-bottom: 1px solid #4A4A4A !important;
+            border-bottom: 1px solid #40485d !important;
         }
         .stTabs [data-baseweb="tab"] {
-            color: #FAFAFA !important;
+            color: #a3aac4 !important;
             background-color: transparent !important;
             border: none !important;
             padding: 8px 16px !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.01em !important;
         }
         .stTabs [data-baseweb="tab"]:hover {
-            background-color: rgba(255,255,255,0.05) !important;
+            background-color: #0f1930 !important;
+            color: #dee5ff !important;
         }
         .stTabs [aria-selected="true"] {
             background-color: transparent !important;
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            color: #FC7D49 !important;
-            border-bottom: 2px solid #FC7D49 !important;
+            color: #a3a6ff !important;
+            border-bottom: 2px solid #a3a6ff !important;
         }
         /* Make all layout containers transparent so dark app bg shows through */
         [data-testid="stColumn"],
@@ -163,10 +169,11 @@ if dark_mode:
         html body .stApp button,
         html body .stApp .stButton > button,
         html body .stApp button[data-testid="baseButton-secondary"] {
-            background: #262730 !important;
-            background-color: #262730 !important;
-            color: #FAFAFA !important;
-            border: 1px solid #4A4A4A !important;
+            background: #0f1930 !important;
+            background-color: #0f1930 !important;
+            color: #dee5ff !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
         html body .stApp button > div,
         html body .stApp button > div > span {
@@ -176,26 +183,29 @@ if dark_mode:
         html body .stApp button:hover,
         html body .stApp .stButton > button:hover,
         html body .stApp button[data-testid="baseButton-secondary"]:hover {
-            background: #3A3A4A !important;
-            background-color: #3A3A4A !important;
-            border: 1px solid #FC7D49 !important;
+            background: #1f2b49 !important;
+            background-color: #1f2b49 !important;
+            border: 1px solid #a3a6ff !important;
         }
         /* Primary buttons */
         html body .stApp button[data-testid="baseButton-primary"],
         html body .stApp .stButton > button[data-testid="baseButton-primary"] {
-            background: #FC7D49 !important;
-            background-color: #FC7D49 !important;
-            color: #FFFFFF !important;
+            background: #a3a6ff !important;
+            background-color: #a3a6ff !important;
+            color: #060e20 !important;
             border: none !important;
+            border-radius: 0.5rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em !important;
         }
         html body .stApp button[data-testid="baseButton-primary"]:hover,
         html body .stApp .stButton > button[data-testid="baseButton-primary"]:hover {
-            background: #e06535 !important;
-            background-color: #e06535 !important;
+            background: #8387ff !important;
+            background-color: #8387ff !important;
             border: none !important;
         }
         .stMarkdown, .stMarkdown p, .stMarkdown li {
-            color: #FAFAFA !important;
+            color: #dee5ff !important;
         }
         .stSuccess {
             background-color: #1B4332 !important;
@@ -205,178 +215,313 @@ if dark_mode:
             background-color: #5C4A1F !important;
             color: #FFD54F !important;
         }
-        .stError   {
+        .stError {
             background-color: #5C1F1F !important;
             color: #EF5350 !important;
         }
         .stDownloadButton > button {
-            background-color: #262730 !important;
-            color: #FAFAFA !important;
-            border: 1px solid #4A4A4A !important;
+            background-color: #0f1930 !important;
+            color: #dee5ff !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
-        h1, h2, h3, h4, h5, h6 { color: #FAFAFA !important; }
-        a { color: #FC7D49 !important; }
-        a:hover { color: #FFA07A !important; }
-        .stSpinner > div { border-top-color: #FC7D49 !important; }
-        .stCaption { color: #B0B0B0 !important; }
-        hr { border-color: #4A4A4A !important; }
-        .stCheckbox label { color: #FAFAFA !important; }
+        h1, h2, h3, h4, h5, h6 {
+            color: #dee5ff !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+        a { color: #a3a6ff !important; }
+        a:hover { color: #c3d1ea !important; }
+        .stSpinner > div { border-top-color: #a3a6ff !important; }
+        .stCaption { color: #a3aac4 !important; }
+        hr { border-color: #40485d !important; }
+        .stCheckbox label { color: #dee5ff !important; }
         /* Expander header and body */
         [data-testid="stExpander"] {
-            background-color: #1E1E2E !important;
-            border: 1px solid #4A4A4A !important;
+            background-color: #091328 !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
         [data-testid="stExpander"] summary,
         [data-testid="stExpander"] summary p,
         [data-testid="stExpander"] summary span,
         [data-testid="stExpander"] summary svg {
-            background-color: #1E1E2E !important;
-            color: #FAFAFA !important;
+            background-color: #091328 !important;
+            color: #dee5ff !important;
         }
         [data-testid="stExpander"] > div,
         [data-testid="stExpander"] > details > div,
         [data-testid="stExpanderDetails"] {
-            background-color: #1E1E2E !important;
-            color: #FAFAFA !important;
+            background-color: #091328 !important;
+            color: #dee5ff !important;
         }
         [data-baseweb="accordion"] {
-            background-color: #1E1E2E !important;
+            background-color: #091328 !important;
         }
         [data-baseweb="accordion"] > div,
         [data-baseweb="accordion"] header,
         [data-baseweb="accordion"] header span {
-            background-color: #1E1E2E !important;
-            color: #FAFAFA !important;
+            background-color: #091328 !important;
+            color: #dee5ff !important;
         }
         /* File uploader – cloud mode */
         [data-testid="stFileUploaderDropzone"] {
-            background-color: #262730 !important;
-            border: 1px solid #4A4A4A !important;
-            border-radius: 6px !important;
+            background-color: #0f1930 !important;
+            border: 1px solid #40485d !important;
+            border-radius: 0.5rem !important;
         }
         [data-testid="stFileUploaderDropzone"] small {
-            color: #808080 !important;
+            color: #a3aac4 !important;
         }
         [data-testid="stFileUploaderDropzone"] button {
-            background-color: #1E1E2E !important;
-            border: 1px solid #4A4A4A !important;
-            color: #FAFAFA !important;
+            background-color: #091328 !important;
+            border: 1px solid #40485d !important;
+            color: #dee5ff !important;
         }
         [data-testid="stFileUploaderDropzone"] button:hover {
-            background-color: #3A3A4A !important;
-            border: 1px solid #FC7D49 !important;
+            background-color: #1f2b49 !important;
+            border: 1px solid #a3a6ff !important;
         }
         [data-testid="stFileUploader"] label {
-            color: #FAFAFA !important;
+            color: #dee5ff !important;
         }
         </style>
         """
 else:
     _theme_css = """
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
         <style>
-        .stApp { background-color: #FFFFFF !important; }
+        /* ── Base ────────────────────────────────────────────────────────── */
+        .stApp { background-color: #fcf8f9 !important; font-family: 'Inter', sans-serif !important; }
         header[data-testid="stHeader"] {
-            background-color: #F0F2F6 !important;
+            background: rgba(252, 248, 249, 0.80) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            box-shadow: 0 1px 0 rgba(90, 94, 108, 0.08) !important;
         }
-        .stApp * { color: #31333F; }
+        .stApp * { color: #323235; font-family: 'Inter', sans-serif !important; }
+        /* Ensure all Streamlit structural containers stay transparent/light */
+        [data-testid="stVerticalBlock"],
+        [data-testid="stHorizontalBlock"],
+        [data-testid="stColumn"],
+        .stMain > div,
+        .block-container {
+            background-color: transparent !important;
+        }
+        /* ── Inputs ─────────────────────────────────────────────────────── */
         .stTextInput > div > div > input {
-            background-color: #FFFFFF !important;
-            color: #31333F !important;
-            border: 1px solid #CCC !important;
+            background-color: #e4e2e5 !important;
+            color: #323235 !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            box-shadow: none !important;
         }
-        .stTextInput > div > div > input::placeholder {
-            color: #999 !important;
+        .stTextInput > div > div > input:focus {
+            border: 1px solid rgba(90, 94, 108, 0.4) !important;
+            box-shadow: 0 0 0 3px rgba(90, 94, 108, 0.08) !important;
         }
-        .stTextInput label { color: #31333F !important; }
+        .stTextInput > div > div > input::placeholder { color: #5f5f61 !important; }
+        .stTextInput label {
+            color: #5f5f61 !important;
+            font-size: 0.6875rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.05em !important;
+            text-transform: uppercase !important;
+        }
         .stTextArea textarea {
-            background-color: #FFFFFF !important;
-            color: #31333F !important;
-            border: 1px solid #CCC !important;
+            background-color: #e4e2e5 !important;
+            color: #323235 !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
         }
-        .stTextArea label { color: #31333F !important; }
-        .stCodeBlock, pre { background-color: #F0F2F6 !important; }
+        .stTextArea textarea:focus {
+            border: 1px solid rgba(90, 94, 108, 0.4) !important;
+            box-shadow: 0 0 0 3px rgba(90, 94, 108, 0.08) !important;
+        }
+        .stTextArea label {
+            color: #5f5f61 !important;
+            font-size: 0.6875rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.05em !important;
+            text-transform: uppercase !important;
+        }
+        /* ── Select / Dropdown ──────────────────────────────────────────── */
+        [data-baseweb="select"] > div,
+        [data-baseweb="select"] input {
+            background-color: #eae7ea !important;
+            color: #323235 !important;
+            border: none !important;
+        }
+        [data-baseweb="popover"] [role="option"] {
+            background-color: #fcf8f9 !important;
+            color: #323235 !important;
+        }
+        [data-baseweb="popover"] [role="option"]:hover {
+            background-color: #f0edef !important;
+        }
+        /* ── Code ───────────────────────────────────────────────────────── */
+        .stCodeBlock, pre {
+            background-color: #f0edef !important;
+            border-radius: 0.5rem !important;
+        }
         code {
-            color: #1E6BA8 !important;
-            background-color: #F0F2F6 !important;
+            color: #5a5e6c !important;
+            background-color: #f0edef !important;
             padding: 2px 6px !important;
             border-radius: 3px !important;
         }
         .stMarkdown code {
-            color: #1E6BA8 !important;
-            background-color: #F0F2F6 !important;
+            color: #5a5e6c !important;
+            background-color: #f0edef !important;
         }
+        /* ── Tabs ───────────────────────────────────────────────────────── */
         .stTabs [data-baseweb="tab-list"] {
             background-color: transparent !important;
-            border-bottom: 1px solid #E0E0E0 !important;
+            border-bottom: 1px solid #b3b1b4 !important;
         }
         .stTabs [data-baseweb="tab"] {
-            color: #31333F !important;
+            color: #5f5f61 !important;
             background-color: transparent !important;
             border: none !important;
             padding: 8px 16px !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.01em !important;
         }
         .stTabs [data-baseweb="tab"]:hover {
-            background-color: rgba(0,0,0,0.04) !important;
+            background-color: #f6f3f4 !important;
+            color: #323235 !important;
         }
-        .stTabs [aria-selected="true"] {
+        .stTabs [aria-selected="true"] { background-color: transparent !important; }
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {
+            color: #5a5e6c !important;
+            border-bottom: 2px solid #5a5e6c !important;
+        }
+        /* ── Buttons ────────────────────────────────────────────────────── */
+        [data-testid="stButton"],
+        .stButton,
+        .stButton > div,
+        [data-testid="stButton"] > div,
+        [data-testid="baseButton-content"] {
+            background: transparent !important;
             background-color: transparent !important;
         }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            color: #FC7D49 !important;
-            border-bottom: 2px solid #FC7D49 !important;
-        }
-        .stButton > button,
-        button[data-testid="baseButton-secondary"] {
-            background-color: #FFFFFF !important;
-            color: #31333F !important;
-            border: 1px solid #CCC !important;
-        }
-        .stButton > button:hover,
-        button[data-testid="baseButton-secondary"]:hover {
-            background-color: #F0F2F6 !important;
-            border: 1px solid #FC7D49 !important;
-        }
-        /* Primary buttons */
-        .stButton > button[data-testid="baseButton-primary"],
-        button[data-testid="baseButton-primary"] {
-            background-color: #FC7D49 !important;
-            color: #FFFFFF !important;
+        html body .stApp button,
+        html body .stApp .stButton > button,
+        html body .stApp button[data-testid="baseButton-secondary"] {
+            background-color: #eae7ea !important;
+            color: #323235 !important;
             border: none !important;
+            border-radius: 0.5rem !important;
+            font-weight: 500 !important;
+            box-shadow: 0px 12px 32px rgba(50, 50, 53, 0.06) !important;
         }
-        .stButton > button[data-testid="baseButton-primary"]:hover,
-        button[data-testid="baseButton-primary"]:hover {
-            background-color: #e06535 !important;
+        html body .stApp button > div,
+        html body .stApp button > div > span {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+        html body .stApp button:hover,
+        html body .stApp .stButton > button:hover,
+        html body .stApp button[data-testid="baseButton-secondary"]:hover {
+            background-color: #e4e2e5 !important;
             border: none !important;
+            box-shadow: 0px 12px 32px rgba(50, 50, 53, 0.1) !important;
         }
-        .stMarkdown, .stMarkdown p, .stMarkdown li {
-            color: #31333F !important;
+        /* Primary: gradient from secondary (#5e5f65) to secondary-container (#e2e2e9) */
+        html body .stApp button[data-testid="baseButton-primary"],
+        html body .stApp .stButton > button[data-testid="baseButton-primary"] {
+            background: linear-gradient(135deg, #5e5f65, #9496a1) !important;
+            color: #f9f8ff !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em !important;
+            box-shadow: 0px 4px 16px rgba(90, 94, 108, 0.20) !important;
         }
+        html body .stApp button[data-testid="baseButton-primary"]:hover,
+        html body .stApp .stButton > button[data-testid="baseButton-primary"]:hover {
+            background: linear-gradient(135deg, #4e5260, #7b7d88) !important;
+            border: none !important;
+            box-shadow: 0px 6px 20px rgba(90, 94, 108, 0.28) !important;
+        }
+        /* ── Markdown / text ─────────────────────────────────────────────── */
+        .stMarkdown, .stMarkdown p, .stMarkdown li { color: #323235 !important; }
+        /* ── Alerts ─────────────────────────────────────────────────────── */
+        .stSuccess { background-color: #e6f4ee !important; color: #1b6b3a !important; }
+        .stWarning { background-color: #fef8e6 !important; color: #7a5800 !important; }
+        .stError   { background-color: #fde8e8 !important; color: #b91c1c !important; }
+        /* ── Download button ─────────────────────────────────────────────── */
         .stDownloadButton > button {
-            background-color: #FFFFFF !important;
-            color: #31333F !important;
-            border: 1px solid #CCC !important;
+            background-color: #eae7ea !important;
+            color: #323235 !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
         }
-        h1, h2, h3, h4, h5, h6 { color: #0E1117 !important; }
-        a { color: #FC7D49 !important; }
-        a:hover { color: #FFA07A !important; }
-        .stCheckbox label { color: #31333F !important; }
-        /* File uploader – cloud mode */
+        /* ── Typography ─────────────────────────────────────────────────── */
+        h1, h2, h3, h4, h5, h6 {
+            color: #323235 !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+        a { color: #5a5e6c !important; }
+        a:hover { color: #323235 !important; }
+        .stSpinner > div { border-top-color: #5a5e6c !important; }
+        .stCaption { color: #5f5f61 !important; }
+        hr { border-color: #b3b1b4 !important; opacity: 0.4 !important; }
+        .stCheckbox label { color: #323235 !important; }
+        /* ── Toggle ─────────────────────────────────────────────────────── */
+        [data-testid="stToggle"] label,
+        [data-testid="stToggle"] label p,
+        [data-testid="stToggle"] label span { color: #323235 !important; }
+        /* ── Expanders ───────────────────────────────────────────────────── */
+        [data-testid="stExpander"] {
+            background-color: #f6f3f4 !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0px 12px 32px rgba(50, 50, 53, 0.05) !important;
+        }
+        [data-testid="stExpander"] summary,
+        [data-testid="stExpander"] summary p,
+        [data-testid="stExpander"] summary span,
+        [data-testid="stExpander"] summary svg {
+            background-color: #f6f3f4 !important;
+            color: #323235 !important;
+        }
+        [data-testid="stExpander"] > div,
+        [data-testid="stExpander"] > details > div,
+        [data-testid="stExpanderDetails"] {
+            background-color: #f6f3f4 !important;
+            color: #323235 !important;
+        }
+        [data-baseweb="accordion"] { background-color: #f6f3f4 !important; }
+        [data-baseweb="accordion"] > div,
+        [data-baseweb="accordion"] header,
+        [data-baseweb="accordion"] header span {
+            background-color: #f6f3f4 !important;
+            color: #323235 !important;
+        }
+        /* ── File uploader ───────────────────────────────────────────────── */
         [data-testid="stFileUploaderDropzone"] {
-            background-color: #F8F9FA !important;
-            border: 1px solid #CCC !important;
-            border-radius: 6px !important;
+            background-color: #f0edef !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
         }
+        [data-testid="stFileUploaderDropzone"] small { color: #5f5f61 !important; }
         [data-testid="stFileUploaderDropzone"] button {
-            background-color: #FFFFFF !important;
-            border: 1px solid #CCC !important;
-            color: #31333F !important;
+            background-color: #f6f3f4 !important;
+            border: none !important;
+            color: #323235 !important;
         }
         [data-testid="stFileUploaderDropzone"] button:hover {
-            background-color: #F0F2F6 !important;
-            border: 1px solid #FC7D49 !important;
+            background-color: #eae7ea !important;
+            border: none !important;
         }
         [data-testid="stFileUploader"] label {
-            color: #31333F !important;
+            color: #5f5f61 !important;
+            font-size: 0.6875rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.05em !important;
+            text-transform: uppercase !important;
         }
         </style>
         """
