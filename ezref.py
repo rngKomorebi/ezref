@@ -22,6 +22,7 @@ from api_clients import (
     get_crossref_by_doi,
     get_from_arxiv,
     search_crossref_by_citation,
+    search_crossref_by_title,
 )
 from bib_fix import REQUEST_DELAY
 from bib_fix import extract_arxiv_id as _bib_extract_arxiv_id
@@ -600,6 +601,16 @@ def _process_input(user_input: str) -> tuple:
                 "Paper not found in CrossRef. "
                 "It may be too recent or not indexed yet."
             )
+    elif not user_input.startswith("http"):
+        # Last resort: extract a quoted title from a raw text citation and
+        # search CrossRef by title (covers Proc. SPIE and similar formats).
+        title_match = re.search(r'["\u201c]([^"\u201d]{10,})["\u201d]', user_input)
+        if title_match:
+            candidate = title_match.group(1).strip()
+            item = search_crossref_by_title(candidate)
+            if item:
+                entry_dict = make_bib_entry_from_crossref(item)
+                search_title = item.get("title", [""])[0]
 
     return entry_dict, arxiv_entry, search_title
 
@@ -620,6 +631,8 @@ def _display_paper_info(
     with col2:
         if entry_dict.get("journal"):
             st.markdown(f"**Journal:** {entry_dict['journal']}")
+        if entry_dict.get("booktitle"):
+            st.markdown(f"**Proceedings:** {entry_dict['booktitle']}")
         if entry_dict.get("volume"):
             st.markdown(f"**Volume:** {entry_dict['volume']}")
         if entry_dict.get("number"):
@@ -658,6 +671,7 @@ def _display_citations(entry_dict: dict) -> None:
 
     with t1:
         bibtex = bib_entry_dict_to_string(entry_dict)
+        st.session_state["ct_bibtex"] = bibtex
         st.text_area(
             "BibTeX",
             bibtex,
@@ -684,9 +698,11 @@ def _display_citations(entry_dict: dict) -> None:
     ]:
         with tab_obj:
             st.markdown(f"**{label}:**")
+            citation_text = fmt_fn(entry_dict)
+            st.session_state[key] = citation_text
             st.text_area(
                 "Citation",
-                fmt_fn(entry_dict),
+                citation_text,
                 height=h,
                 label_visibility="collapsed",
                 key=key,

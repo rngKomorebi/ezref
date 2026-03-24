@@ -9,8 +9,9 @@ def format_apa_citation(entry: dict) -> str:
 
     citation = f"{authors} ({year}). {title}."
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f", {entry['volume']}"
@@ -43,8 +44,9 @@ def format_mla_citation(entry: dict) -> str:
 
     citation = f'{mla_author}. "{title}."'
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f", vol. {entry['volume']}"
@@ -67,8 +69,9 @@ def format_chicago_citation(entry: dict) -> str:
 
     citation = f'{authors}. "{title}."'
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f" {entry['volume']}"
@@ -109,8 +112,9 @@ def format_ieee_citation(entry: dict) -> str:
 
     citation = f'{author_str}, "{title},"'
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f", vol. {entry['volume']}"
@@ -140,8 +144,9 @@ def format_harvard_citation(entry: dict) -> str:
 
     citation += f" '{title}'"
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f", {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f", {entry['volume']}"
@@ -180,8 +185,9 @@ def format_vancouver_citation(entry: dict) -> str:
 
     citation = f"{author_str}. {title}."
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}."
         if "year" in entry:
             citation += f" {year}"
@@ -227,8 +233,9 @@ def format_nature_citation(entry: dict) -> str:
 
     citation = f"{author_str} {title}."
 
-    if "journal" in entry and entry["journal"]:
-        journal = entry["journal"]
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        journal = venue
         citation += f" {journal}"
         if "volume" in entry and entry["volume"]:
             citation += f" {entry['volume']}"

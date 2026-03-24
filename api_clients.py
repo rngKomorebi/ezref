@@ -89,6 +89,34 @@ def search_crossref_by_citation(
     return []
 
 
+def search_crossref_by_title(title: str) -> Optional[dict]:
+    """
+    Search CrossRef by paper title.
+
+    Returns the best-matching item, or None if no confident match found.
+    """
+    try:
+        params = {"query.title": title, "rows": 5}
+        response = requests.get(
+            CROSSREF_API_URL, params=params, timeout=CROSSREF_TIMEOUT
+        )
+        response.raise_for_status()
+        items = response.json().get("message", {}).get("items", [])
+        title_words = set(re.sub(r"[^a-z0-9]", " ", title.lower()).split())
+        for item in items:
+            item_title = item.get("title", [""])[0]
+            item_words = set(
+                re.sub(r"[^a-z0-9]", " ", item_title.lower()).split()
+            )
+            if title_words and (
+                len(title_words & item_words) / len(title_words) >= 0.7
+            ):
+                return item
+    except Exception as e:
+        print(f"CrossRef title search error: {e}")
+    return None
+
+
 def get_from_arxiv(query: str) -> Optional[dict]:
     """
     Search arXiv API by ID or title.

@@ -63,8 +63,8 @@ def extract_doi(text: str) -> Optional[str]:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             doi = match.group(1).rstrip(".,;)")
-            # Remove common file extensions
-            for ext in [".pdf", ".html", ".htm", ".xml"]:
+            # Remove common file extensions and SPIE URL suffixes
+            for ext in [".pdf", ".html", ".htm", ".xml", ".short", ".full", ".abstract", ".long"]:
                 if doi.lower().endswith(ext):
                     doi = doi[: -len(ext)]
             return doi
