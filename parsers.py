@@ -5,6 +5,7 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
+
 from config import (
     ARXIV_PATTERNS,
     DEFAULT_HEADERS,
@@ -64,7 +65,16 @@ def extract_doi(text: str) -> Optional[str]:
         if match:
             doi = match.group(1).rstrip(".,;)")
             # Remove common file extensions and SPIE URL suffixes
-            for ext in [".pdf", ".html", ".htm", ".xml", ".short", ".full", ".abstract", ".long"]:
+            for ext in [
+                ".pdf",
+                ".html",
+                ".htm",
+                ".xml",
+                ".short",
+                ".full",
+                ".abstract",
+                ".long",
+            ]:
                 if doi.lower().endswith(ext):
                     doi = doi[: -len(ext)]
             return doi
@@ -148,6 +158,38 @@ def extract_optica_info(url: str) -> Optional[dict]:
     return None
 
 
+def extract_ieee_metadata(url: str) -> Optional[dict]:
+    """
+    Extract DOI and title from an IEEE Xplore URL.
+
+    IEEE's document pages are JS-rendered behind a WAF, so we use the
+    articleDetails.jsp endpoint which returns a crawlable HTML page.
+
+    Args:
+        url: ieeexplore.ieee.org URL
+
+    Returns:
+        Dict with 'doi' and 'title', or None if not an IEEE URL / request fails
+    """
+    m = re.search(r"ieeexplore\.ieee\.org/(?:abstract/)?document/(\d+)", url, re.IGNORECASE)
+    if not m:
+        return None
+    arnumber = m.group(1)
+    try:
+        details_url = f"https://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber={arnumber}"
+        resp = requests.get(details_url, headers=DEFAULT_HEADERS, timeout=URL_FETCH_TIMEOUT)
+        resp.raise_for_status()
+        doi_m = re.search(r'"doi"\s*:\s*"(10\.[^"]+)"', resp.text)
+        doi = doi_m.group(1).strip() if doi_m else None
+        title_m = re.search(r'"title"\s*:\s*"([^"]{10,})"', resp.text)
+        title = title_m.group(1) if title_m else None
+        if doi or title:
+            return {"doi": doi, "title": title}
+    except Exception:
+        pass
+    return None
+
+
 def extract_metadata_from_url(url: str) -> dict:
     """
     Extract DOI and title from a publisher webpage.
@@ -161,6 +203,14 @@ def extract_metadata_from_url(url: str) -> dict:
     metadata = {"doi": None, "title": None}
 
     if url.lower().endswith(".pdf"):
+        return metadata
+
+    # IEEE Xplore: JS-rendered, use their REST API instead
+    if "ieeexplore.ieee.org" in url.lower():
+        ieee_meta = extract_ieee_metadata(url)
+        if ieee_meta:
+            metadata["doi"] = ieee_meta.get("doi")
+            metadata["title"] = ieee_meta.get("title")
         return metadata
 
     # Check for Optica URLs

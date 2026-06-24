@@ -47,6 +47,7 @@ from formatters import (
     format_chicago_citation,
     format_harvard_citation,
     format_ieee_citation,
+    format_komorebi_citation,
     format_mla_citation,
     format_nature_citation,
     format_vancouver_citation,
@@ -604,7 +605,9 @@ def _process_input(user_input: str) -> tuple:
     elif not user_input.startswith("http"):
         # Last resort: extract a quoted title from a raw text citation and
         # search CrossRef by title (covers Proc. SPIE and similar formats).
-        title_match = re.search(r'["\u201c]([^"\u201d]{10,})["\u201d]', user_input)
+        title_match = re.search(
+            r'["\u201c]([^"\u201d]{10,})["\u201d]', user_input
+        )
         if title_match:
             candidate = title_match.group(1).strip()
             item = search_crossref_by_title(candidate)
@@ -656,7 +659,7 @@ def _display_paper_info(
 def _display_citations(entry_dict: dict) -> None:
     """Render citations in all supported formats."""
     st.subheader("Citations")
-    t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(
+    t1, t2, t3, t4, t5, t6, t7, t8, t9 = st.tabs(
         [
             "BibTeX",
             "APA",
@@ -666,6 +669,7 @@ def _display_citations(entry_dict: dict) -> None:
             "Harvard",
             "Vancouver",
             "Nature",
+            "Komorebi",
         ]
     )
 
@@ -695,6 +699,7 @@ def _display_citations(entry_dict: dict) -> None:
         (t6, "Harvard", format_harvard_citation, "ct_harvard", 120),
         (t7, "Vancouver", format_vancouver_citation, "ct_vancouver", 100),
         (t8, "Nature", format_nature_citation, "ct_nature", 100),
+        (t9, "Komorebi", format_komorebi_citation, "ct_komorebi", 120),
     ]:
         with tab_obj:
             st.markdown(f"**{label}:**")

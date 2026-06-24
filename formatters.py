@@ -202,6 +202,65 @@ def format_vancouver_citation(entry: dict) -> str:
     return citation
 
 
+def format_komorebi_citation(entry: dict) -> str:
+    """Format citation in Komorebi style."""
+    authors = entry.get("author", "Unknown")
+    author_parts = [a.strip() for a in authors.split(" and ")]
+    formatted_authors = []
+
+    for author in author_parts[:6]:
+        if "," in author:
+            last, first = author.split(",", 1)
+            first = first.strip()
+            if first:
+                initials = ". ".join([n[0] for n in first.split()]) + "."
+                formatted_authors.append(f"{initials} {last.strip()}")
+            else:
+                formatted_authors.append(last.strip())
+        else:
+            formatted_authors.append(author)
+
+    if len(author_parts) > 6:
+        author_str = ", ".join(formatted_authors) + " et al."
+    elif len(formatted_authors) > 1:
+        author_str = ", ".join(formatted_authors[:-1]) + " and " + formatted_authors[-1]
+    elif formatted_authors:
+        author_str = formatted_authors[0]
+    else:
+        author_str = authors
+
+    title = entry.get("title", "").strip("{}")
+    year = entry.get("year", "n.d.")
+    doi = entry.get("doi", "")
+    eprint = entry.get("eprint", "")
+
+    citation = f"{author_str}, {title},"
+
+    venue = entry.get("journal") or entry.get("booktitle")
+    if venue:
+        pages = entry.get("pages", "")
+
+        citation += f" {venue}"
+        if entry.get("volume"):
+            citation += f" {entry['volume']}"
+        citation += f" ({year})"
+        if pages:
+            citation += f" {pages}"
+        if eprint:
+            citation += f" [arXiv:{eprint}]"
+        citation += "."
+    else:
+        if eprint:
+            citation += f" arXiv:{eprint} ({year})."
+        else:
+            citation += f" ({year})."
+
+    if doi:
+        citation += f"\nhttps://doi.org/{doi}"
+
+    return citation
+
+
 def format_nature_citation(entry: dict) -> str:
     """Format citation in Nature journal style."""
     authors = entry.get("author", "Unknown")
