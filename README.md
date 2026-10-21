@@ -21,8 +21,26 @@ The app opens automatically in your browser (dark mode on by default).
 Paste a paper URL, DOI, or arXiv ID and get:
 
 - Paper metadata (title, authors, journal, year, DOI)
-- Citations in **8 formats**: BibTeX, APA, MLA, Chicago, IEEE, Harvard, Vancouver, Nature
+- Citations in **9 formats**: BibTeX, APA, MLA, Chicago, IEEE, Harvard, Vancouver, Nature, Komorebi
+- Each style shown twice: a formatted preview (italic journal names, bold volumes where the style asks for them — select and copy into Word to keep the formatting) and a plain-text box
 - One-click `.bib` file download
+
+### Citation styles
+
+| Style | Edition / source | Authors listed | Italic / bold |
+|-------|------------------|----------------|---------------|
+| APA | APA 7th ed. | up to 20; 21+ → first 19, ". . .", last author | journal, volume |
+| MLA | MLA 9th ed. | up to 2; 3+ → first author, et al. | journal |
+| Chicago | CMOS 18th ed., notes-bibliography | up to 6; 7+ → first 3, et al. | journal |
+| IEEE | IEEE Reference Guide (2025) | up to 6; 7+ → first author et al. | journal |
+| Harvard | Cite Them Right | up to 3; 4+ → first author et al. | journal |
+| Vancouver | ICMJE / NLM sample references | up to 6; 7+ → first 6, et al. | — |
+| Nature | Nature / Nature Communications formatting guide | up to 5; 6+ → first author et al. | journal; **volume** bold |
+| Komorebi | house style (Nature-like typography) | up to 10; 11+ → first author et al. | journal; **volume** bold |
+
+Page ranges use an en dash; Chicago and MLA shorten the second number per their rules (e.g. MLA `100–10`), Vancouver uses NLM form (`100-10`). Titles are kept in the case supplied by the source, and journal names are not abbreviated.
+
+Author names from CrossRef are recased only when they arrive in ALL CAPS or all lowercase; mixed-case names such as McDonald, DiVincenzo or van der Waals are kept as given.
 
 ### Supported inputs
 
@@ -71,9 +89,9 @@ ezref/
 ├── config.py              # API URLs, timeouts, regex patterns
 ├── api_clients.py         # CrossRef and arXiv API clients
 ├── parsers.py             # DOI / arXiv / URL / PDF metadata extraction
-├── formatters.py          # Citation formatters (APA, MLA, Chicago, …)
+├── formatters.py          # Citation formatters (APA, MLA, Chicago, IEEE, Nature, …)
 ├── bibtex_utils.py        # BibTeX entry building and serialisation
-├── test_ezref.py          # pytest suite (100 tests)
+├── test_ezref.py          # pytest suite (124 tests)
 ├── requirements.txt       # Python dependencies
 ├── .streamlit/
 │   └── config.toml        # Theme and server settings

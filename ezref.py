@@ -703,6 +703,15 @@ def _display_citations(entry_dict: dict) -> None:
     ]:
         with tab_obj:
             st.markdown(f"**{label}:**")
+            # Formatted preview: select & copy keeps italics/bold in Word etc.
+            st.markdown(
+                '<div style="border:1px solid rgba(128,128,128,0.35);'
+                "border-radius:0.5rem;padding:0.6rem 0.8rem;"
+                'margin-bottom:0.5rem;line-height:1.5">'
+                f"{fmt_fn(entry_dict, html=True)}</div>",
+                unsafe_allow_html=True,
+            )
+            st.caption("Plain text:")
             citation_text = fmt_fn(entry_dict)
             st.session_state[key] = citation_text
             st.text_area(

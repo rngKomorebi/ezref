@@ -8,8 +8,30 @@ import requests
 from config import BIBTEX_FIELD_ORDER, CROSSREF_TYPE_MAP
 
 
+# Lowercase name particles (van der Waals, de Broglie, von Neumann, ...)
+_NAME_PARTICLES = {
+    "van", "von", "der", "den", "de", "del", "della", "di", "da", "dos",
+    "das", "du", "la", "le", "ten", "ter", "zu",
+}
+
+
+def _recase_name(name: str) -> str:
+    """Title-case a name only if it is all-caps or all-lowercase.
+
+    Mixed-case input (McDonald, van der Waals, DiVincenzo) is kept as given,
+    since .title() would turn it into Mcdonald / Van Der Waals / Divincenzo.
+    """
+    if not (name.isupper() or name.islower()):
+        return name
+    words = name.lower().split()
+    return " ".join(
+        w if w in _NAME_PARTICLES and len(words) > 1 else w.title()
+        for w in words
+    )
+
+
 def normalize_author_string(author_str: str) -> str:
-    """Normalize author names to Title Case and standard BibTeX format."""
+    """Normalize author names to standard BibTeX 'Last, First' format."""
     authors = [
         a.strip()
         for a in re.split(r"\s+and\s+", author_str, flags=re.IGNORECASE)
@@ -24,7 +46,7 @@ def normalize_author_string(author_str: str) -> str:
             first_last = parts[0].split()
             last = first_last[-1]
             first = " ".join(first_last[:-1])
-        norm = f"{last.title()}, {first.title()}"
+        norm = f"{_recase_name(last)}, {_recase_name(first)}"
         normalized.append(norm)
     return " and ".join(normalized)
 

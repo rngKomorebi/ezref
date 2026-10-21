@@ -25,7 +25,9 @@ from bibtex_utils import (
 from formatters import (
     format_apa_citation,
     format_chicago_citation,
+    format_harvard_citation,
     format_ieee_citation,
+    format_komorebi_citation,
     format_mla_citation,
     format_nature_citation,
     format_vancouver_citation,
@@ -184,6 +186,27 @@ class TestNormalizeAuthorString:
     def test_title_case_applied(self):
         result = normalize_author_string("smith, john")
         assert "Smith" in result
+
+    def test_all_caps_recased(self):
+        assert normalize_author_string("SMITH, JOHN R.") == "Smith, John R."
+
+    def test_mixed_case_preserved(self):
+        result = normalize_author_string(
+            "McDonald, Ann and van der Waals, J. D. and DiVincenzo, David P."
+        )
+        assert result == (
+            "McDonald, Ann and van der Waals, J. D. and DiVincenzo, David P."
+        )
+
+    def test_particles_lowercase_when_recased(self):
+        assert normalize_author_string("VAN DER WAALS, JOHANNES") == (
+            "van der Waals, Johannes"
+        )
+
+    def test_hyphen_and_apostrophe_recased(self):
+        assert normalize_author_string("O'BRIEN, JEAN-PIERRE") == (
+            "O'Brien, Jean-Pierre"
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -348,6 +371,128 @@ class TestFormatVancouverCitation:
         result = format_vancouver_citation(_SAMPLE)
         # Vancouver uses initials without dots between them
         assert "Smith" in result
+
+
+def _with_authors(n: int) -> dict:
+    return {
+        **_SAMPLE,
+        "author": " and ".join(f"Last{i}, First{i}" for i in range(n)),
+    }
+
+
+class TestAuthorCountRules:
+    """Per-style limits on how many authors are listed before et al."""
+
+    def test_apa_lists_20_then_19_ellipsis_last(self):
+        assert "et al" not in format_apa_citation(_with_authors(20))
+        result = format_apa_citation(_with_authors(21))
+        assert "Last18, F., . . . Last20, F." in result
+        assert "Last19" not in result
+
+    def test_mla_two_authors_second_not_inverted(self):
+        assert format_mla_citation(_SAMPLE).startswith("Smith, John, and Jane Doe.")
+
+    def test_mla_three_authors_et_al(self):
+        assert format_mla_citation(_with_authors(3)).startswith(
+            "Last0, First0, et al."
+        )
+
+    def test_chicago_six_listed_seven_first_three(self):
+        assert "et al." not in format_chicago_citation(_with_authors(6))
+        result = format_chicago_citation(_with_authors(7))
+        assert result.startswith("Last0, First0, First1 Last1, First2 Last2, et al.")
+
+    def test_ieee_six_listed_seven_first_author(self):
+        result = format_ieee_citation(_with_authors(6))
+        assert "F. Last4, and F. Last5," in result
+        assert format_ieee_citation(_with_authors(7)).startswith("F. Last0 et al.,")
+
+    def test_harvard_three_listed_four_first_author(self):
+        assert format_harvard_citation(_with_authors(3)).startswith(
+            "Last0, F., Last1, F. and Last2, F. (2020)"
+        )
+        assert format_harvard_citation(_with_authors(4)).startswith(
+            "Last0, F. et al. (2020)"
+        )
+
+    def test_vancouver_six_listed_seven_first_six(self):
+        assert "et al" not in format_vancouver_citation(_with_authors(6))
+        assert "Last5 F, et al." in format_vancouver_citation(_with_authors(7))
+
+    def test_nature_five_listed_six_first_author(self):
+        result = format_nature_citation(_with_authors(5))
+        assert result.startswith("Last0, F., Last1, F., Last2, F., Last3, F. & Last4, F.")
+        assert format_nature_citation(_with_authors(6)).startswith("Last0, F. et al.")
+
+    def test_komorebi_ten_listed_eleven_first_author(self):
+        result = format_komorebi_citation(_with_authors(10))
+        assert "et al." not in result
+        assert "F. Last8 and F. Last9," in result
+        assert format_komorebi_citation(_with_authors(11)).startswith(
+            "F. Last0 et al.,"
+        )
+
+
+class TestFormatterTypography:
+    def test_plain_text_has_no_markup(self):
+        for fn in (format_apa_citation, format_nature_citation, format_komorebi_citation):
+            assert "<i>" not in fn(_SAMPLE)
+            assert "" not in fn(_SAMPLE)
+
+    def test_journal_italic(self):
+        for fn in (
+            format_apa_citation,
+            format_mla_citation,
+            format_chicago_citation,
+            format_ieee_citation,
+            format_harvard_citation,
+        ):
+            assert "<i>Nature</i>" in fn(_SAMPLE, html=True)
+
+    def test_apa_volume_italic_issue_plain(self):
+        assert "<i>42</i>(3)" in format_apa_citation(_SAMPLE, html=True)
+
+    def test_nature_and_komorebi_volume_bold(self):
+        assert "<i>Nature</i> <b>42</b>, 100" in format_nature_citation(_SAMPLE, html=True)
+        assert "<i>Nature</i> <b>42</b> (2020)" in format_komorebi_citation(
+            _SAMPLE, html=True
+        )
+
+    def test_vancouver_no_markup(self):
+        result = format_vancouver_citation(_SAMPLE, html=True)
+        assert "<i>" not in result and "<b>" not in result
+
+    def test_html_escapes_title(self):
+        entry = {**_SAMPLE, "title": "{Bounds for x < 5 & y > 2}"}
+        assert "x &lt; 5 &amp; y &gt; 2" in format_ieee_citation(entry, html=True)
+
+
+class TestFormatterDetails:
+    def test_page_range_en_dash(self):
+        assert "100–110" in format_apa_citation(_SAMPLE)
+        assert "--" not in format_ieee_citation(_SAMPLE)
+
+    def test_vancouver_elided_pages(self):
+        assert "2020;42(3):100-10." in format_vancouver_citation(_SAMPLE)
+
+    def test_hyphenated_given_name_initials(self):
+        entry = {**_SAMPLE, "author": "Dupont, Jean-Pierre"}
+        assert "J.-P. Dupont" in format_ieee_citation(entry)
+        assert "Dupont JP." in format_vancouver_citation(entry)
+
+    def test_name_without_comma_not_dropped(self):
+        entry = {**_SAMPLE, "author": "John Smith and Jane Doe"}
+        assert "J. Smith and J. Doe" in format_ieee_citation(entry)
+
+    def test_arxiv_url_in_doi_field_not_prefixed(self):
+        entry = {
+            "author": "Smith, John",
+            "title": "{Preprint}",
+            "year": "2024",
+            "doi": "https://arxiv.org/abs/2401.00001",
+        }
+        assert "doi.org/https" not in format_apa_citation(entry)
+        assert "https://arxiv.org/abs/2401.00001" in format_apa_citation(entry)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
